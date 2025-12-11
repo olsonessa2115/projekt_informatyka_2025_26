@@ -1,58 +1,56 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <array>
 
-class cegielka {
+class Cegielka {
 private:
-    sf::RectangleShape cegla;
-    sf::Vector2f position;
-    float pktZycia;
-    bool JestZniszczony;
-    static const std::array<sf::Color, 4> kolory;
+    sf::RectangleShape blok;
+    int wytrzymalosc;
+    bool aktywna;
+
+    void ustawKolor();
+
 public:
-    cegielka(int x, int y, int L);
-    void rysuj(sf::RenderWindow& window);
-    void trafienie();
-    void aktualizujkolor();
-    sf::Vector2f getPos() const { return cegla.getPosition(); }
-    bool getJestZniszczony() const { return JestZniszczony; }
-    float getHp() const { return pktZycia; }
+    Cegielka(float x, float y, int hp);
+    sf::RectangleShape& getKsztalt();
+    bool czyZniszczona() const;
+    void otrzymajObrazenia();
+    int pobierzHp() const;
 };
 
-const std::array<sf::Color, 4> cegielka::kolory = {
-    sf::Color(75, 0, 130),
-    sf::Color(138, 43, 226),
-    sf::Color(186, 85, 211),
-    sf::Color(255, 20, 147)
-};
+Cegielka::Cegielka(float x, float y, int hp) {
+    wytrzymalosc = hp;
+    aktywna = true;
 
-cegielka::cegielka(int x, int y, int L) {
-    pktZycia = static_cast<float>(L);
-    JestZniszczony = false;
-    cegla.setSize({ 80.f, 25.f });
-    cegla.setOrigin(40.f, 12.5f);
-    cegla.setPosition(static_cast<float>(x), static_cast<float>(y));
-    cegla.setOutlineThickness(1.f);
-    cegla.setOutlineColor(sf::Color::Black);
-    aktualizujkolor();
+    blok.setSize(sf::Vector2f(80.f, 25.f));
+    blok.setOrigin(40.f, 12.5f);
+    blok.setPosition(x, y);
+    blok.setOutlineThickness(1.f);
+    blok.setOutlineColor(sf::Color::Black);
+    ustawKolor();
 }
 
-void cegielka::aktualizujkolor() {
-    if (pktZycia >= 1 && pktZycia <= 4)
-        cegla.setFillColor(kolory[static_cast<size_t>(pktZycia - 1)]);
-    else if (pktZycia > 0)
-        cegla.setFillColor(kolory[3]);
+void Cegielka::ustawKolor() {
+    if (wytrzymalosc >= 4) blok.setFillColor(sf::Color(255, 20, 147));
+    else if (wytrzymalosc == 3) blok.setFillColor(sf::Color(186, 85, 211));
+    else if (wytrzymalosc == 2) blok.setFillColor(sf::Color(138, 43, 226));
+    else blok.setFillColor(sf::Color(75, 0, 130));
 }
 
-void cegielka::trafienie() {
-    if (JestZniszczony)
-        return;
-    pktZycia--;
-    aktualizujkolor();
-    if (pktZycia <= 0)
-        JestZniszczony = true;
+sf::RectangleShape& Cegielka::getKsztalt() {
+    return blok;
 }
 
-void cegielka::rysuj(sf::RenderWindow& window) {
-    window.draw(cegla);
+bool Cegielka::czyZniszczona() const {
+    return !aktywna;
+}
+
+void Cegielka::otrzymajObrazenia() {
+    if (!aktywna) return;
+    wytrzymalosc--;
+    ustawKolor();
+    if (wytrzymalosc <= 0) aktywna = false;
+}
+
+int Cegielka::pobierzHp() const {
+    return wytrzymalosc;
 }
